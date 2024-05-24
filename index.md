@@ -1,5 +1,1 @@
-Here you can say lots of fun things about your site.
-
-Maybe say a some things about yourself.
-
-Or maybe what you plan to blog about.
+Hi I am Akash singh. I love to explore new advancements in computer systems while sipping my Coffee. I am an explorer by nature and love to be outdoors when i am not on my desk. I will try to maintain this site through my learning journey in tech and life. Writing around my travels, adventures and whatever I learn in short and long form.
