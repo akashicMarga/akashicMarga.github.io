@@ -19,6 +19,7 @@ For example, when you write a Python script, the CPython interpreter acts as a c
 For further reading on compilers, check out these resources:
 - [Introduction to Compilers](https://en.wikipedia.org/wiki/Compiler)
 - [How Compilers Work](https://www.cs.columbia.edu/~sedwards/classes/2004/4995/compilers/)
+- [Metal Kernels](https://developer.apple.com/documentation/metalperformanceshaders?language=objc)
 
 ### **How Do AI Compilers Transform High-Level Models?**
 
