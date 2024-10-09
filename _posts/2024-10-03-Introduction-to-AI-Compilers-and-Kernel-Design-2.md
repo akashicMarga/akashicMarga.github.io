@@ -55,7 +55,7 @@ with open('quantized_model.tflite', 'wb') as f:
 
 Let's visualize the effect of quantization on model size and accuracy:
 
-![Quantisation effect chart](/_posts/quantisation.png)
+<img src="https://github.com/akashicMarga/akashicMarga.github.io/blob/b81c468d3f1c60337d260b2e65b785b53f3b90e2/_posts/quantisation.png" alt="Quantisation effect chart" style="width:50%; position:relative; left:20px;"/>
 
 This chart illustrates how quantization significantly reduces model size and inference time while maintaining most of the model's accuracy.
 
@@ -98,7 +98,7 @@ print(
 
 Let's visualize the effect of pruning on a neural network:
         
-![Pruning](/_posts/pruning.png)
+<img src="https://github.com/akashicMarga/akashicMarga.github.io/blob/b81c468d3f1c60337d260b2e65b785b53f3b90e2/_posts/pruning.png" alt="Pruning" style="width:50%; position:relative; left:20px;"/>
 
 
 This visualization shows how pruning removes less important connections in the neural network, resulting in a sparser but still functional model.
@@ -131,7 +131,7 @@ func = tvm.build(s, [A, C], "llvm")
 
 Let's visualize the effect of kernel fusion:
 
-![Kernel Fusion](/_posts/kernel_fusion.png)
+<img src="https://github.com/akashicMarga/akashicMarga.github.io/blob/b81c468d3f1c60337d260b2e65b785b53f3b90e2/_posts/kernel_fusion.png" alt="Kernel Fusion" style="width:50%; position:relative; left:20px;"/>
 
 This visualization demonstrates how separate kernels for addition and multiplication are fused into a single, more efficient kernel.
 
