@@ -186,16 +186,14 @@ Graphs can model these complex dependencies efficiently and allow dynamic execut
 
 Let's explore matrix fusion with an example. Consider the operation:
 
-$$
-\[
+$$\[
 Z = A \times B + C
-\]
-$$
+\]$$
 
 Where:
-- **Matrix A**: $\( A \in \mathbb{R}^{m \times n} \)$
-- **Matrix B**: $\( B \in \mathbb{R}^{n \times p} \)$
-- **Matrix C**: $\( C \in \mathbb{R}^{m \times p} \)$
+- **Matrix A**: \( A \in \mathbb{R}^{m \times n} \)
+- **Matrix B**: \( B \in \mathbb{R}^{n \times p} \)
+- **Matrix C**: \( C \in \mathbb{R}^{m \times p} \)
 
 Without fusion, you would perform matrix multiplication first:
 
