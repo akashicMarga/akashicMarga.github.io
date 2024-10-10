@@ -283,7 +283,7 @@ $$
 y = s_y \cdot (y_q - z_y)
 $$
 
-where $\( s_y \)$ and $\( z_y \)$ are the scale and zero points for the output.
+where s_y and z_y are the scale and zero points for the output.
 
 #### PyTorch Code Example for Post-Training Quantization:
 
@@ -463,7 +463,7 @@ The flow from high-level operations to machine code can be broken down like this
    
    This operation is represented in a computational graph.
    
-3. **Optimization**: The backend applies graph-level optimizations like fusing adjacent operations.
+2. **Optimization**: The backend applies graph-level optimizations like fusing adjacent operations.
    
     $$
     \text{conv}(X, W) \rightarrow \text{optimizedconv\}(X, W)
@@ -471,7 +471,7 @@ The flow from high-level operations to machine code can be broken down like this
    
    This results in fewer operations, minimizing data movement and computation.
 
-5. **Lowering to Machine Code**: The backend lowers this optimized operation into hardware-specific machine code. For a GPU, this might mean creating a CUDA kernel to perform the convolution in parallel.
+3. **Lowering to Machine Code**: The backend lowers this optimized operation into hardware-specific machine code. For a GPU, this might mean creating a CUDA kernel to perform the convolution in parallel.
    
    Example CUDA kernel code (simplified):
    ```cpp
@@ -485,7 +485,7 @@ The flow from high-level operations to machine code can be broken down like this
    ```
    The PyTorch backend would generate something similar to the above CUDA kernel, optimized for the particular input size and hardware.
 
-6. **Execution**: The CUDA kernel is launched with thousands of parallel threads to execute the convolution across multiple data elements simultaneously. The output is then returned back to the host (CPU) or used for further GPU computations.
+4. **Execution**: The CUDA kernel is launched with thousands of parallel threads to execute the convolution across multiple data elements simultaneously. The output is then returned back to the host (CPU) or used for further GPU computations.
 
 #### **4. Multi-Device Backend Support**
 
@@ -702,9 +702,15 @@ Tensors are the core data structure in PyTorch, representing multi-dimensional a
    This is crucial for training deep learning models, where gradients are used to update model parameters during optimization.
 
 #### **Mathematical Representation of Tensors**:
-Mathematically, a tensor $\( T \)$ is a multi-dimensional array, where each element is indexed by a set of coordinates:
-- A scalar is a 0-D tensor: $\( T = 5 \)$
-- A vector is a 1-D tensor: $\( T = [t_1, t_2, ..., t_n] \)$
+Mathematically, a tensor T is a multi-dimensional array, where each element is indexed by a set of coordinates:
+- A scalar is a 0-D tensor:
+  $$
+  T = 5
+  $$
+- A vector is a 1-D tensor:
+  $$
+  T = [t_1, t_2, ..., t_n]
+  $$
 - A matrix is a 2-D tensor:
 
 $$
@@ -747,7 +753,7 @@ In Glow, the **Intermediate Representation (IR)** is a low-level graph-based str
      y = (x + 2) \times 3
      $$
      
-     If $\( x \)$ is constant, the addition and multiplication can be computed once and stored as a constant result.
+     If x is constant, the addition and multiplication can be computed once and stored as a constant result.
    
    - **Operator Fusion**: Combines multiple nodes in the IR (e.g., matrix multiplication followed by addition) into a single node to reduce intermediate memory usage and improve computational efficiency.
 
@@ -756,8 +762,15 @@ In Glow, the **Intermediate Representation (IR)** is a low-level graph-based str
 6. **Machine Code Generation**: After optimization, the final IR is translated into hardware-specific instructions, such as **LLVM IR** for CPUs or **CUDA kernels** for GPUs. This process ensures that the computational graph is transformed into the most efficient machine code for the target device.
 
 #### **Mathematical Representation of IR**:
-Mathematically, an IR graph can be thought of as a directed acyclic graph (DAG), where each node represents a function $\( f \)$ applied to inputs, and edges represent the flow of data. For example, the function graph for $\( z = (A \times B) + C \)$ can be represented as:
-- Nodes: $\( f_{\text{matmul}}(A, B) \)$, $\( f_{\text{add}}(matmul, C) \)$
+Mathematically, an IR graph can be thought of as a directed acyclic graph (DAG), where each node represents a function $\( f \)$ applied to inputs, and edges represent the flow of data. For example, the function graph for 
+$$
+z = (A \times B) + C \)
+$$
+can be represented as:
+- Nodes:
+  $$
+  f_{\text{matmul}}(A, B) \)$, $\( f_{\text{add}}(matmul, C)
+  $$
 - Edges: Data flows from the outputs of the multiplication to the inputs of the addition.
 
 ---
