@@ -1,4 +1,4 @@
-# A Cosmic Odyssey: Journey Through Quantum Reality and Ancient Wisdom
+# A Cosmic Odyssey Journey Through Quantum Reality and Ancient Wisdom
 
 I wrote this in the spirit of exploration, driven by my ever-expanding curiosity and passion for understanding and visualising. Recently, I’ve found myself immersed in various realms of knowledge—philosophy, science, and everything in between—each beckoning me to go deeper into the rabbit hole. This journey has ignited my desire to write about these profound insights, not just as an exercise in learning, but to illuminate the path for those who, like me, are on a quest to understand the nature of reality. As I embark on this journey of self-discovery and cosmic exploration, I do so with one guiding principle: *He who questions, illuminates.*
 
