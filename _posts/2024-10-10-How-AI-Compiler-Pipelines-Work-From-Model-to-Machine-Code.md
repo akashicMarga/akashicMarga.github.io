@@ -186,37 +186,40 @@ Graphs can model these complex dependencies efficiently and allow dynamic execut
 
 Let's explore matrix fusion with an example. Consider the operation:
 
-$$\[
+$$
 Z = A \times B + C
-\]$$
+$$
 
 Where:
-- **Matrix A**: \( A \in \mathbb{R}^{m \times n} \)
-- **Matrix B**: \( B \in \mathbb{R}^{n \times p} \)
-- **Matrix C**: \( C \in \mathbb{R}^{m \times p} \)
-
+- **Matrix A**:
+   $$
+   ( A \in \mathbb{R}^{m \times n} \)
+   $$
+- **Matrix B**:
+  $$
+  ( B \in \mathbb{R}^{n \times p} \)
+  $$
+- **Matrix C**:
+  $$
+  ( C \in \mathbb{R}^{m \times p} \)
+  $$
+  
 Without fusion, you would perform matrix multiplication first:
 
 $$
-\[
 D = A \times B
-\]
 $$
 
 And then perform element-wise addition:
 
 $$
-\[
 Z = D + C
-\]
 $$
 
 However, with fusion, the compiler can recognize that these two operations can be combined into a single kernel launch:
 
 $$
-\[
 Z[i, j] = \sum_{k=1}^{n} A[i, k] \times B[k, j] + C[i, j]
-\]
 $$
 
 This fused operation computes both the matrix multiplication and addition in one pass, reducing memory overhead and improving efficiency.
