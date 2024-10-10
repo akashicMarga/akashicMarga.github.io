@@ -466,12 +466,13 @@ The flow from high-level operations to machine code can be broken down like this
 2. **Optimization**: The backend applies graph-level optimizations like fusing adjacent operations.
    
     $$
-    \text{conv}(X, W) \rightarrow \text{optimizedconv\}(X, W)
+    \text{conv}(X, W) \rightarrow
+    \text{optimizedconv\}(X, W)
     $$
    
    This results in fewer operations, minimizing data movement and computation.
 
-3. **Lowering to Machine Code**: The backend lowers this optimized operation into hardware-specific machine code. For a GPU, this might mean creating a CUDA kernel to perform the convolution in parallel.
+4. **Lowering to Machine Code**: The backend lowers this optimized operation into hardware-specific machine code. For a GPU, this might mean creating a CUDA kernel to perform the convolution in parallel.
    
    Example CUDA kernel code (simplified):
    ```cpp
@@ -485,7 +486,7 @@ The flow from high-level operations to machine code can be broken down like this
    ```
    The PyTorch backend would generate something similar to the above CUDA kernel, optimized for the particular input size and hardware.
 
-4. **Execution**: The CUDA kernel is launched with thousands of parallel threads to execute the convolution across multiple data elements simultaneously. The output is then returned back to the host (CPU) or used for further GPU computations.
+5. **Execution**: The CUDA kernel is launched with thousands of parallel threads to execute the convolution across multiple data elements simultaneously. The output is then returned back to the host (CPU) or used for further GPU computations.
 
 #### **4. Multi-Device Backend Support**
 
