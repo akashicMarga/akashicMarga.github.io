@@ -763,8 +763,10 @@ Both PyTorch tensors and Glow's IR play crucial roles in optimizing and executin
 
 ## Conclusion: The Importance of AI Compilers
 
-We've now taken a deep dive into the AI compiler pipeline, from parsing in the frontend, to optimizations in the middle-end, and finally code generation in the backend. Tools like Glow help extend these optimizations to new hardware, making deep learning models more efficient.
+We've now taken a deep dive into the AI compiler pipeline, from parsing in the frontend, to optimizations in the middle-end, and finally code generation in the backend. Tools like Glow help extend these optimizations to new hardware, making deep learning models more efficient. 
 
 Understanding the internals of AI compilers gives us insight into how frameworks like PyTorch and TensorFlow can run complex models efficiently across various hardware platforms. As AI continues to evolve, the role of compilers in optimizing and deploying models will only grow in importance.
 
 In future blogs, we'll explore more advanced topics such as kernel optimization and hardware-specific tweaks that make models run even faster. Stay tuned for more in-depth explorations of the fascinating world of AI compilers!
+
+You can also check my folder for different resources around [compilers](https://arc.net/folder/A5850BB7-BE06-4B02-B164-205BE7E0916F)
