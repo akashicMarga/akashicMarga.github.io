@@ -762,10 +762,12 @@ In Glow, the **Intermediate Representation (IR)** is a low-level graph-based str
 6. **Machine Code Generation**: After optimization, the final IR is translated into hardware-specific instructions, such as **LLVM IR** for CPUs or **CUDA kernels** for GPUs. This process ensures that the computational graph is transformed into the most efficient machine code for the target device.
 
 #### **Mathematical Representation of IR**:
-Mathematically, an IR graph can be thought of as a directed acyclic graph (DAG), where each node represents a function $\( f \)$ applied to inputs, and edges represent the flow of data. For example, the function graph for 
+Mathematically, an IR graph can be thought of as a directed acyclic graph (DAG), where each node represents a function f applied to inputs, and edges represent the flow of data. For example, the function graph for 
+
 $$
-z = (A \times B) + C \)
+z = (A \times B) + C)
 $$
+
 can be represented as:
 - Nodes:
   $$
