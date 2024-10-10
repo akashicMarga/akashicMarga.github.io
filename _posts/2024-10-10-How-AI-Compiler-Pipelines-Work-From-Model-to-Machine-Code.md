@@ -259,7 +259,7 @@ Quantization in deep learning often involves converting both **weights** and **a
    - z_w is the **zero point** that shifts the integer range to approximate the distribution of the original data.
 
 2. **Quantization of Activations**:
-   - Activations are also quantized in a similar manner, with scale $s_a and zero point z_a .
+   - Activations are also quantized in a similar manner, with scale s_a and zero point z_a .
    
    During forward propagation, instead of operating on floating-point values, the operations happen on integers. The result is then de-quantized back to floating-point, but these intermediate steps happen much faster due to the simpler nature of integer math.
 
@@ -771,7 +771,11 @@ $$
 can be represented as:
 - Nodes:
   $$
-  f_{\text{matmul}}(A, B) \)$, $\( f_{\text{add}}(matmul, C)
+  f_{\text{matmul}}(A, B)
+  $$
+  ,
+  $$
+  f_{\text{add}}(matmul, C)
   $$
 - Edges: Data flows from the outputs of the multiplication to the inputs of the addition.
 
