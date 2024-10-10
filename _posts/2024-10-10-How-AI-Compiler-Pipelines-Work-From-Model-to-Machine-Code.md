@@ -239,19 +239,19 @@ Quantization is a process that approximates a **continuous range of values** (li
 Quantization in deep learning often involves converting both **weights** and **activations** from 32-bit floating point (FP32) to lower-bit representations, such as 8-bit integers (INT8). The process can be formalized as:
 
 1. **Quantization of Weights**: 
-   - Let's say we have a weight matrix $\( W \in \mathbb{R}^{m \times n} \)$, where each element is represented as a 32-bit floating-point number.
-   - During quantization, we map the continuous values in $\( W \)$ to a set of **integer** values $\( W_q \in \mathbb{Z}^{m \times n} \)$, typically 8-bit integers.
+   - Let's say we have a weight matrix \W \in \mathbb{R}^{m \times n}, where each element is represented as a 32-bit floating-point number.
+   - During quantization, we map the continuous values in \W to a set of **integer** values \W_q \in \mathbb{Z}^{m \times n}, typically 8-bit integers.
    
    The mapping follows:
    $$
    W_q = \text{round} \left( \frac{W}{s_w} \right) + z_w
    $$
    where:
-   - \( s_w ) is the **scale factor** that adjusts the range of floating-point numbers to fit within the 8-bit range.
-   - \( z_w ) is the **zero point** that shifts the integer range to approximate the distribution of the original data.
+   - \s_w is the **scale factor** that adjusts the range of floating-point numbers to fit within the 8-bit range.
+   - \z_w is the **zero point** that shifts the integer range to approximate the distribution of the original data.
 
 2. **Quantization of Activations**:
-   - Activations are also quantized in a similar manner, with scale $\( s_a \)$ and zero point $\( z_a \)$.
+   - Activations are also quantized in a similar manner, with scale $s_a and zero point \z_a .
    
    During forward propagation, instead of operating on floating-point values, the operations happen on integers. The result is then de-quantized back to floating-point, but these intermediate steps happen much faster due to the simpler nature of integer math.
 
