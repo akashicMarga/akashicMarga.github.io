@@ -466,8 +466,7 @@ The flow from high-level operations to machine code can be broken down like this
 2. **Optimization**: The backend applies graph-level optimizations like fusing adjacent operations.
    
     $$
-    \text{conv}(X, W) \rightarrow
-    \text{optimizedconv\}(X, W)
+    \text{conv}(X, W) \rightarrow \text{optimizedconv}(X, W)
     $$
    
    This results in fewer operations, minimizing data movement and computation.
