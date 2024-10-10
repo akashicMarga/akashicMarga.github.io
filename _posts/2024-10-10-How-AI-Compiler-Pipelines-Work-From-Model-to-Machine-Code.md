@@ -193,15 +193,15 @@ $$
 Where:
 - **Matrix A**:
    $$
-   ( A \in \mathbb{R}^{m \times n} \)
+   ( A \in \mathbb{R}^{m \times n} )
    $$
 - **Matrix B**:
   $$
-  ( B \in \mathbb{R}^{n \times p} \)
+  ( B \in \mathbb{R}^{n \times p} )
   $$
 - **Matrix C**:
   $$
-  ( C \in \mathbb{R}^{m \times p} \)
+  ( C \in \mathbb{R}^{m \times p} )
   $$
   
 Without fusion, you would perform matrix multiplication first:
@@ -243,12 +243,12 @@ Quantization in deep learning often involves converting both **weights** and **a
    - During quantization, we map the continuous values in $\( W \)$ to a set of **integer** values $\( W_q \in \mathbb{Z}^{m \times n} \)$, typically 8-bit integers.
    
    The mapping follows:
-   $$\[
+   $$
    W_q = \text{round} \left( \frac{W}{s_w} \right) + z_w
-   \]$$
+   $$
    where:
-   - $\( s_w \)$ is the **scale factor** that adjusts the range of floating-point numbers to fit within the 8-bit range.
-   - $\( z_w \)$ is the **zero point** that shifts the integer range to approximate the distribution of the original data.
+   - \( s_w ) is the **scale factor** that adjusts the range of floating-point numbers to fit within the 8-bit range.
+   - \( z_w ) is the **zero point** that shifts the integer range to approximate the distribution of the original data.
 
 2. **Quantization of Activations**:
    - Activations are also quantized in a similar manner, with scale $\( s_a \)$ and zero point $\( z_a \)$.
