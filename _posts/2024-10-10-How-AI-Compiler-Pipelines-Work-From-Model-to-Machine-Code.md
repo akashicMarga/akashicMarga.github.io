@@ -239,41 +239,49 @@ Quantization is a process that approximates a **continuous range of values** (li
 Quantization in deep learning often involves converting both **weights** and **activations** from 32-bit floating point (FP32) to lower-bit representations, such as 8-bit integers (INT8). The process can be formalized as:
 
 1. **Quantization of Weights**: 
-   - Let's say we have a weight matrix \W \in \mathbb{R}^{m \times n}, where each element is represented as a 32-bit floating-point number.
-   - During quantization, we map the continuous values in \W to a set of **integer** values \W_q \in \mathbb{Z}^{m \times n}, typically 8-bit integers.
+   - Let's say we have a weight matrix
+     $$
+     W \in \mathbb{R}^{m \times n}
+     $$
+     , where each element is represented as a 32-bit floating-point number.
+   - During quantization, we map the continuous values in \W to a set of **integer** values
+     $$
+     W_q \in \mathbb{Z}^{m \times n}
+     $$
+     , typically 8-bit integers.
    
    The mapping follows:
    $$
    W_q = \text{round} \left( \frac{W}{s_w} \right) + z_w
    $$
    where:
-   - \s_w is the **scale factor** that adjusts the range of floating-point numbers to fit within the 8-bit range.
-   - \z_w is the **zero point** that shifts the integer range to approximate the distribution of the original data.
+   - s_w is the **scale factor** that adjusts the range of floating-point numbers to fit within the 8-bit range.
+   - z_w is the **zero point** that shifts the integer range to approximate the distribution of the original data.
 
 2. **Quantization of Activations**:
-   - Activations are also quantized in a similar manner, with scale $s_a and zero point \z_a .
+   - Activations are also quantized in a similar manner, with scale $s_a and zero point z_a .
    
    During forward propagation, instead of operating on floating-point values, the operations happen on integers. The result is then de-quantized back to floating-point, but these intermediate steps happen much faster due to the simpler nature of integer math.
 
 #### Mathematical Details
 
-Let’s assume a single layer, such as a fully connected layer, with weight matrix $\( W \)$ and input activations $\( x \)$. Normally, the output is computed as:
+Let’s assume a single layer, such as a fully connected layer, with weight matrix W and input activations x . Normally, the output is computed as:
 
-$$\[
+$$
 y = W \cdot x
-\]
 $$
 For a quantized network, the forward pass is computed as:
 $$
-\[
 y_q = \left( \text{round}\left( \frac{W}{s_w} \right) + z_w \right) \cdot \left( \text{round}\left( \frac{x}{s_a} \right) + z_a \right)
-\]
 $$
-The result $\( y_q \)$ is then de-quantized:
+The result 
 $$
-\[
+y_q
+$$ 
+is then de-quantized:
+$$
 y = s_y \cdot (y_q - z_y)
-\]$$
+$$
 
 where $\( s_y \)$ and $\( z_y \)$ are the scale and zero points for the output.
 
@@ -327,21 +335,29 @@ There are different kinds of pruning:
 
 #### Mathematical Details
 
-Consider a weight matrix $\( W \in \mathbb{R}^{m \times n} \)$ in a fully connected or convolutional layer. The goal of pruning is to **zero out** (remove) the weights that are not contributing much to the output.
+Consider a weight matrix 
+$$
+W \in \mathbb{R}^{m \times n}
+$$
+in a fully connected or convolutional layer. The goal of pruning is to **zero out** (remove) the weights that are not contributing much to the output.
 
 1. **Unstructured Pruning** (L1 Norm):
    - We prune the weights with the smallest magnitude, under the assumption that these contribute the least to the model's final prediction.
    - For example, we can use L1 norm pruning:
    
-   $$\[
+   $$
    W_p = \text{argmin}_{W} \left( \| W \|_1 \right)
-   \]$$
+   $$
    
    This removes the weights with the smallest absolute values.
 
 2. **Structured Pruning**:
    - Here, we remove entire **filters** (in CNNs) or **neurons** (in fully connected layers). The criterion is typically the L1 or L2 norm of the filters.
-   - For instance, in a convolutional layer with filter weights $\( W_f \in \mathbb{R}^{k \times k} \)$, we can remove the filters with the smallest norms.
+   - For instance, in a convolutional layer with filter weights
+     $$
+     W_f \in \mathbb{R}^{k \times k}
+     $$
+     , we can remove the filters with the smallest norms.
 
 #### PyTorch Code Example for Pruning:
 
@@ -441,17 +457,17 @@ The flow from high-level operations to machine code can be broken down like this
 
 1. **High-Level Operation**: For example, a convolution layer in a neural network.
    
-   $$\[
+   $$
    \text{conv}(X, W) = \text{convolution}(X, W)
-   \]$$
+   $$
    
    This operation is represented in a computational graph.
    
 3. **Optimization**: The backend applies graph-level optimizations like fusing adjacent operations.
    
-    $$\[
+    $$
     \text{conv}(X, W) \rightarrow \text{optimizedconv\}(X, W)
-    \]$$
+    $$
    
    This results in fewer operations, minimizing data movement and computation.
 
@@ -563,9 +579,9 @@ This optimization involves precomputing constant expressions during the compilat
 
 For example:
 
-$$\[
+$$
 \text{MatMul}(X, W) + B \rightarrow \text{precomputebias}(W, B)
-\]$$
+$$
 
 If `B` is constant, the addition can be folded into the matrix multiplication operation.
 
@@ -727,9 +743,9 @@ In Glow, the **Intermediate Representation (IR)** is a low-level graph-based str
 
    - **Constant Folding**: Precomputes parts of the computation graph involving constant values during compile time instead of runtime. For example:
      
-     $\[
+     $$
      y = (x + 2) \times 3
-     \]$
+     $$
      
      If $\( x \)$ is constant, the addition and multiplication can be computed once and stored as a constant result.
    
