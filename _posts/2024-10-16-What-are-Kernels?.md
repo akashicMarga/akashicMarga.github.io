@@ -46,20 +46,20 @@ Let’s start with matrix multiplication as it’s a fundamental operation in de
 
 The matrix product 
 $$
-\( C = A \times B \)
+C = A \times B
 $$
 
 ,where:
-- $\( A \)$ is an
+- *A*  is an
   $$
-  \( M \times K \)
+  M \times K
   $$ matrix,
-- $\( B \)$ is a
-  $$\( K \times N \)
+- *B* is a
+  $$ K \times N
   $$ matrix,
-- $\( C \)$ is the resulting
+- *C* is the resulting
   $$
-  \( M \times N \)
+  M \times N
   $$ matrix,
 
 is computed as:
@@ -68,7 +68,7 @@ $$
 C_{i,j} = \sum_{k=1}^{K} A_{i,k} \times B_{k,j}
 $$
 
-Each element in matrix $\( C \)$ is a dot product between a row of $\( A \)$ and a column of $\( B \)$. This process is computationally expensive, especially when $\( M \)$, $\( N \)$, and $\( K \)$ are large.
+Each element in matrix *C* is a dot product between a row of *A* and a column of *B*. This process is computationally expensive, especially when *M*, *N*, and *K* are large.
 
 #### **Naive Matrix Multiplication (CPU)**
 
@@ -82,7 +82,7 @@ The CPU implementation using **NumPy** performs this operation by calculating ea
 
 A key optimization for matrix multiplication on GPUs is **tiling**. Tiling breaks the matrices into smaller sub-blocks (or tiles) that can be processed independently in parallel. The key idea here is to exploit **data locality** and **parallel execution** on the GPU.
 
-In the naive matrix multiplication, when computing a single element of the result matrix, you need to load an entire row of matrix $\( A \)$ and an entire column of matrix \( B \) into memory. By tiling, we ensure that chunks of data that are needed together stay in faster, shared memory, reducing the need to reload data from global memory.
+In the naive matrix multiplication, when computing a single element of the result matrix, you need to load an entire row of matrix *A* and an entire column of matrix *B* into memory. By tiling, we ensure that chunks of data that are needed together stay in faster, shared memory, reducing the need to reload data from global memory.
 
 #### **Optimized Triton Matrix Multiplication Kernel with Tiling**
 
@@ -139,7 +139,7 @@ def triton_matmul(A, B):
 GPUs perform well when threads access memory in a **coalesced** manner, meaning that threads in a warp should access consecutive memory locations. This reduces the number of memory transactions and improves overall performance.
 
 In the above **Triton** matrix multiplication kernel:
-- Memory accesses to tiles are carefully designed to be contiguous, enabling coalesced memory access. For instance, each thread in a warp accesses consecutive elements from \( A \) and \( B \), allowing the GPU to read these elements efficiently.
+- Memory accesses to tiles are carefully designed to be contiguous, enabling coalesced memory access. For instance, each thread in a warp accesses consecutive elements from *A* and *B*, allowing the GPU to read these elements efficiently.
 
 #### **Example: Non-Coalesced vs Coalesced Access**
 Imagine a group of threads accessing memory:
@@ -163,9 +163,9 @@ $$
 
 Where:
 - $$
-  \( H \times W \)
+  H \times W
   $$ is the size of the filter.
-- The sum is computed for each location $\( (i, j) \)$ of the output.
+- The sum is computed for each location *(i, j)* of the output.
 
 #### **Optimizing Convolution with Triton**
 
