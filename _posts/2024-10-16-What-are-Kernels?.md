@@ -44,17 +44,28 @@ Efficient memory usage is critical for kernel performance. GPUs have multiple le
 #### **Mathematical Formulation**
 Let’s start with matrix multiplication as it’s a fundamental operation in deep learning models.
 
-The matrix product $\( C = A \times B \)$, where:
-- $\( A \)$ is an $\( M \times K \)$ matrix,
-- $\( B \)$ is a $\( K \times N \)$ matrix,
-- $\( C \)$ is the resulting $\( M \times N \)$ matrix,
+The matrix product 
+$$
+\( C = A \times B \)
+$$
+
+,where:
+- $\( A \)$ is an
+  $$
+  \( M \times K \)
+  $$ matrix,
+- $\( B \)$ is a
+  $$\( K \times N \)
+  $$ matrix,
+- $\( C \)$ is the resulting
+  $$
+  \( M \times N \)
+  $$ matrix,
 
 is computed as:
 
 $$
-\[
 C_{i,j} = \sum_{k=1}^{K} A_{i,k} \times B_{k,j}
-\]
 $$
 
 Each element in matrix $\( C \)$ is a dot product between a row of $\( A \)$ and a column of $\( B \)$. This process is computationally expensive, especially when $\( M \)$, $\( N \)$, and $\( K \)$ are large.
@@ -151,7 +162,9 @@ $$
 $$
 
 Where:
-- $\( H \times W \)$ is the size of the filter.
+- $$
+  \( H \times W \)
+  $$ is the size of the filter.
 - The sum is computed for each location $\( (i, j) \)$ of the output.
 
 #### **Optimizing Convolution with Triton**
