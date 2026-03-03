@@ -321,7 +321,7 @@ This is measurable. I built [prefill-decode-bench](https://github.com/akashicMar
 
 Here's what the output looks like on an Apple M1 with 16GB unified memory, running Llama-3.2-3B-Instruct-4bit through MLX:
 
-![Prefill vs Decode — Llama 3.2 3B on Apple M1](prefill-vs-decode-m1-llama3b.png)
+![Prefill vs Decode — Llama 3.2 3B on Apple M1](/assets/images/prefill-vs-decode-m1-llama3b.png)
 
 The left panel shows prefill throughput staying relatively flat (~222–254 tok/s) across prompt lengths from 128 to 4096 tokens — compute-bound, as expected. The right panel shows decode throughput degrading from 26 tok/s at a small KV cache to 17 tok/s at 2048 tokens — a 35% degradation as the conversation grows. That degradation is the memory bandwidth constraint becoming visible.
 
