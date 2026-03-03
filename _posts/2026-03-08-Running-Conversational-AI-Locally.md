@@ -158,6 +158,12 @@ The effect isn't that one crashes or fails. The effect is that both get slower i
 
 On the 1080 Ti, this was the first thing that made single-model benchmarks feel irrelevant. Each model hit its rated throughput in isolation. Under concurrent load, the pipeline became unpredictable. The models were fine. The system wasn't.
 
+This is measurable on current hardware. Running Llama 3.2 3B and Whisper simultaneously on an Apple M1 with 16GB unified memory using [prefill-decode-bench](https://github.com/akashicMarga/prefill-decode-bench):
+
+![Bandwidth Contention — LLM + Whisper on Apple M1](/assets/images/contention-m1-llama3b-whisper.png)
+
+LLM decode drops from 25.1 tok/s to 17.6 tok/s (−30%), and Whisper's real-time factor drops from 13.8x to 10.1x (−27%). Neither model crashed or ran out of memory — they just both got slower because they're competing for the same memory bus. In a speech pipeline, that 30% decode penalty translates directly to longer pauses between user input and system response.
+
 You can partially work around this through scheduling — serializing parts of the pipeline, batching ASR into segments rather than streaming frame by frame. But every workaround trades one problem for another. Serialize ASR and you increase response latency. Batch ASR and you increase transcription lag. There's no free option. The only structural solution is enough memory bandwidth that the contention penalty becomes small relative to total available throughput. This is one of the core reasons higher-bandwidth chips matter for this workload — not because a single model runs faster, but because multiple models running simultaneously degrade less.
 
 **KV cache growth over a session**
@@ -323,7 +329,25 @@ Here's what the output looks like on an Apple M1 with 16GB unified memory, runni
 
 ![Prefill vs Decode — Llama 3.2 3B on Apple M1](/assets/images/prefill-vs-decode-m1-llama3b.png)
 
-The left panel shows prefill throughput staying relatively flat (~222–254 tok/s) across prompt lengths from 128 to 4096 tokens — compute-bound, as expected. The right panel shows decode throughput degrading from 26 tok/s at a small KV cache to 17 tok/s at 2048 tokens — a 35% degradation as the conversation grows. That degradation is the memory bandwidth constraint becoming visible.
+The left panel shows prefill throughput staying relatively flat (~223–255 tok/s) across prompt lengths from 128 to 4096 tokens — compute-bound, as expected. The right panel shows decode throughput degrading from ~24 tok/s at a small KV cache to ~22 tok/s at 2048 tokens — a 13% degradation as the conversation grows. That degradation is the memory bandwidth constraint becoming visible.
+
+The profiler also captures hardware-level metrics that make the bottleneck concrete:
+
+![Hardware Metrics — Llama 3.2 3B on Apple M1](/assets/images/hardware-metrics-m1-llama3b.png)
+
+Three panels tell the story. **Peak Metal memory** shows the footprint growing from ~1.85GB (model weights only) to ~3.3GB as the KV cache fills — on 16GB unified memory, that's already 20% of total capacity for a single model. **Effective bandwidth** — now accounting for both model weight reads *and* KV cache reads per token — shows the M1 sustaining ~44–47 GB/s during decode against a theoretical peak of 68.25 GB/s, roughly 65–69% utilization. Notably, utilization stays nearly flat as the KV cache grows from 47 to 1873 tokens: the bus reads more data per token (model weights + growing KV cache) and delivers correspondingly more throughput, but the tok/s still drops because each token simply costs more bytes. **Prefill TFLOPS** reaches 1.3–1.4 TFLOPS — about 50–55% of the M1 GPU's ~2.6 TFLOPS theoretical peak — confirming that prefill is compute-bound and the GPU is working substantially harder during this phase.
+
+The arithmetic intensity of 3.1 FLOPs/byte during decode confirms what the theory predicts: well below the M1's roofline crossover of ~38 FLOPs/byte, placing decode firmly in bandwidth-bound territory. Every token requires reading the full model weights plus accumulated KV cache from memory but performs relatively few operations on them. This is why hardware with higher memory bandwidth — not more compute cores — translates directly to faster conversational response.
+
+**Validating theory against measurement — and two gotchas worth knowing**
+
+Getting these numbers right required fixing two measurement bugs that are easy to hit when profiling quantized models, and worth understanding if you're building your own profiling:
+
+*Gotcha 1: Quantized parameter counting.* MLX's `QuantizedLinear` packs multiple INT4 weights into single `uint32` storage elements. Naively counting array elements reports 0.50B parameters for a 3.2B model — a 6x undercount. TFLOPS computed from that (0.22) looks like the GPU is barely working, when the corrected figure (1.4 TFLOPS, ~54% of M1 peak) shows it's working hard during prefill. The fix: unpack the logical dimensions from each quantized layer's shape and bit-width rather than counting storage elements. If your profiler reports suspiciously low TFLOPS for a quantized model, this is likely why.
+
+*Gotcha 2: Bandwidth accounting must include the KV cache.* During decode, the model reads its weights *and* the full KV cache on every token. If you only count weight bytes in your effective bandwidth calculation, utilization appears to decline as the KV cache grows (64% → 55% in our first pass) — suggesting the bus is getting lazier, which makes no physical sense. Including KV cache reads (112 KB/token × sequence length for this model, derived from the GQA formula: `2 × 28 layers × 8 KV heads × 128 head_dim × 2 bytes`) corrects the picture: utilization holds steady at 65–69% across all KV sizes. The bus is doing *more* work per token as the conversation grows — which is exactly why tok/s drops. The bus isn't slower; each token is more expensive.
+
+With both corrections, the measured numbers align with the formulas from the earlier sections: model weight memory within 13% of `params × bytes_per_weight` (the overhead is quantization scales, FP16 embeddings, and layer norms), KV per token matching the GQA-adjusted formula exactly (112 KB), bandwidth utilization in the expected 60–70% range for real workloads, and arithmetic intensity confirming decode is bandwidth-bound. The theory section isn't just framework — it predicts what the profiler measures.
 
 On this M1 with 16GB, decode is already slow enough that a speech pipeline would feel the lag. On higher-bandwidth hardware — M3 Max, M4 Pro, Ultra configurations — the same curve exists but the starting point is higher and the degradation less steep. The tool lets you measure where your specific hardware sits on that curve, with your specific models, rather than relying on spec-sheet bandwidth numbers that don't account for real inference behavior.
 
