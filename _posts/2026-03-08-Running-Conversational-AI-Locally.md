@@ -74,6 +74,8 @@ This is the critical insight: **decode is limited by how fast you can move data,
 
 This was true on the 1080 Ti. It is true on cloud A100s. It is true on Apple Silicon. The hardware changes; the constraint doesn't.
 
+One algorithmic response to this is **speculative decoding**. The observation: during decode, the GPU's compute units are mostly idle — they're waiting for data to arrive from memory. Speculative decoding exploits that idle compute by running a small, fast "draft" model that proposes several tokens cheaply. The large model then verifies the draft tokens in a single parallel forward pass — essentially turning multiple sequential decode steps into one prefill-like batch verification. When the draft model guesses correctly (which it does surprisingly often for common patterns), you get multiple tokens for the cost of one decode step. When it guesses wrong, you fall back to normal decode from the point of divergence. The net effect is higher effective tokens per second without changing the memory bandwidth — you're trading unused compute for better throughput. Both MLX and llama.cpp support speculative decoding, and it's particularly effective on bandwidth-constrained hardware where compute is underutilized during decode.
+
 The TNG Technology Consulting team's [writeup on prefill and decode under concurrent requests](https://huggingface.co/blog/tngtech/llm-performance-prefill-decode-concurrent-requests) is one of the cleaner empirical demonstrations of this. Running production LLM infrastructure on 24 H100 GPUs — 5,000+ inferences per hour, over ten million tokens daily — they show token throughput scaling almost linearly with concurrency up to a point, then flattening sharply. That inflection point is exactly where the system transitions from memory-bandwidth bound to compute bound. It's not theoretical; it shows up in measurements as a clean behavioral shift. Their chunked prefill results are particularly instructive: by breaking prefill into smaller steps and interleaving them with decode steps, they increased total throughput by roughly 50%. The reason that works is exactly the prefill/decode framing — prefill is compute-intensive, decode is memory-bound, running both in parallel keeps different parts of the hardware busy simultaneously rather than serializing workloads that don't need to be.
 
 This framing will inform everything that follows.
@@ -104,7 +106,11 @@ So a 7B parameter model at FP16 consumes about 14GB. At INT4, about 3.5GB. That'
 Total KV ≈ 2 × num_layers × hidden_size × sequence_length × bytes
 ```
 
-For a 7B model (32 layers, hidden size 4096) at FP16, a 4096-token context adds roughly 2GB of KV cache. At 8192 tokens, roughly 4GB. This memory grows as the conversation gets longer and doesn't reset between turns — it accumulates. Which means a system that fits fine at the start of a conversation can start straining after 20–30 exchanges.
+For a 7B model (32 layers, hidden size 4096) at FP16 with standard multi-head attention, a 4096-token context adds roughly 2GB of KV cache. At 8192 tokens, roughly 4GB.
+
+Modern models reduce this through Grouped-Query Attention (GQA), which shares KV heads across multiple query heads. Llama 3 8B, for example, uses 8 KV heads instead of 32 — a 4x reduction in KV cache size. Mistral 7B uses GQA as well. With GQA, a 4096-token context on Llama 3 8B adds closer to ~500MB than 2GB. The formula still applies, but you need to substitute the number of KV heads for the full hidden size: `2 × layers × (kv_heads × head_dim) × seq_len × bytes`.
+
+Even with GQA, the cache still grows linearly with conversation length and doesn't reset between turns. A system that fits fine at the start of a conversation can start straining after extended exchanges — the growth is slower with GQA, but it doesn't stop.
 
 **The components in a moderate pipeline:**
 
@@ -213,6 +219,12 @@ For local LLM inference, the practical difference is real. A Q4_K_M 7B model on 
 The ecosystem has matured quickly: model conversions from Hugging Face formats to MLX-compatible formats are available for most major model families, the community is active and Apple Silicon-focused, and the tooling for loading quantized models, running chat inference, and fine-tuning with LoRA adapters is now genuinely practical rather than experimental.
 
 MLX is not faster than a high-bandwidth discrete GPU for raw throughput. It's the framework that makes unified memory actually useful rather than partially wasted. For anyone running conversational AI on Apple Silicon, it's the right starting point.
+
+**llama.cpp: the cross-platform alternative**
+
+[llama.cpp](https://github.com/ggerganov/llama.cpp) deserves mention alongside MLX because it runs everywhere — Apple Silicon via Metal, Nvidia via CUDA, CPU on Linux and Windows. It pioneered the GGUF quantization format and the k-quant variants (Q4_K_M, Q5_K_M) referenced throughout this post. For Apple Silicon specifically, llama.cpp's Metal backend is mature and performant, and it supports speculative decoding, grammar-constrained generation, and a built-in server mode for API-compatible inference.
+
+The practical difference: MLX is tighter with the Apple Silicon memory model and tends to get framework-level optimizations faster for that platform. llama.cpp is more portable and has a larger ecosystem of tools, quantized model variants, and community benchmarks. If you're working exclusively on Apple Silicon, MLX is the natural choice. If you need to run the same models across different hardware or want the broadest model compatibility, llama.cpp covers more ground.
 
 ---
 
@@ -363,5 +375,6 @@ Hardware selection, in this context, is a systems engineering decision built on 
 - Apple, [MLX — Machine Learning Framework for Apple Silicon](https://github.com/ml-explore/mlx)
 - Hu et al., [LoRA: Low-Rank Adaptation of Large Language Models (2021)](https://arxiv.org/abs/2106.09685)
 - Dettmers et al., [QLoRA: Efficient Finetuning of Quantized LLMs (2023)](https://arxiv.org/abs/2305.14314)
+- [llama.cpp — LLM inference in C/C++ across platforms](https://github.com/ggerganov/llama.cpp)
 - [Personaplex — Speech-to-Speech Conversational AI](https://personaplex.ai/)
 - [prefill-decode-bench — Measure prefill and decode on your hardware](https://github.com/akashicMarga/prefill-decode-bench)
