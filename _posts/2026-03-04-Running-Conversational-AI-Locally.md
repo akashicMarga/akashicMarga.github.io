@@ -2,7 +2,7 @@
 layout: post
 title: "Running Conversational AI Locally: A Systems View on Memory, Bandwidth, and Hardware Choices"
 description: "A systems engineering perspective on running multi-model conversational AI pipelines locally — why memory bandwidth matters more than compute, how to measure it, and how to choose hardware that won't bottleneck at turn 40."
-date: 2026-03-08
+date: 2026-03-04
 tags: AI Systems Hardware
 ---
 
