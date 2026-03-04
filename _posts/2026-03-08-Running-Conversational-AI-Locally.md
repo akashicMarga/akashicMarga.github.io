@@ -202,15 +202,20 @@ Unified memory solves capacity fragmentation. It doesn't solve bandwidth — and
 |----------|--------|-----------------|
 | M3 Pro | 18–36 GB | ~150 GB/s |
 | M4 Pro | 24–48 GB | ~273 GB/s |
+| M5 Pro | up to 64 GB | ~307 GB/s |
 | M3 Max (48GB+) | 48–128 GB | ~400 GB/s |
+| M4 Max | 64–128 GB | ~546 GB/s |
+| M5 Max | up to 128 GB | ~614 GB/s |
 | DGX Spark (GB10) | 128 GB | ~273 GB/s |
 | M2 Ultra / M3 Ultra | 128–192 GB | ~800 GB/s |
 | RTX 4090 | 24 GB VRAM | ~1,008 GB/s |
 | H100 SXM | 80 GB HBM3 | ~3,350 GB/s |
 
-An M3 Max at 400 GB/s is about 40% of an RTX 4090's bandwidth. Against an H100, there's no comparison. For raw token generation speed on a single model, a high-bandwidth discrete GPU wins if the model fits in VRAM.
+The [M5 Pro and M5 Max](https://www.apple.com/newsroom/2026/03/apple-debuts-m5-pro-and-m5-max-to-supercharge-the-most-demanding-pro-workflows/), announced March 2026, are built on Apple's new Fusion Architecture — a dual-die design connecting two 3nm dies into a single SoC. Both feature an 18-core CPU (6 super cores + 12 performance cores) and a next-generation GPU with Neural Accelerators in each core, delivering over 4x the peak GPU compute for AI compared to the M4 generation. For LLM workloads specifically, the bandwidth numbers tell the story: M5 Pro at 307 GB/s projects to ~57 tok/s on a 7B INT4 model at realistic utilization, M5 Max at 614 GB/s to ~114 tok/s — both fast enough that decode stops being the perceptible bottleneck in conversational speech. Apple explicitly markets the M5 Max's higher bandwidth as enabling "higher token generation for LLMs" — bandwidth as an LLM feature, which is exactly this post's thesis.
 
-The critical insight in this table: **capacity and bandwidth are independent constraints.** You can have enormous memory and modest bandwidth, or modest memory and enormous bandwidth. The DGX Spark makes this independence visible. It pairs 128GB of unified LPDDR5x — the capacity of a Mac Studio Ultra — with a full Blackwell GPU and 1 PFLOP of FP4 tensor performance, but only 273 GB/s of memory bandwidth — identical to the M4 Pro. For decode-dominated conversational workloads, where throughput tracks bandwidth rather than compute, it will feel closer to an M4 Pro than to an Ultra despite having datacenter-class compute. The massive PFLOP helps prefill and finetuning; the bandwidth determines how fast tokens come out in a long conversation.
+An M5 Max at 614 GB/s is about 61% of an RTX 4090's bandwidth — closing the gap significantly from the M3 Max era at 40%. Against an H100, there's still no comparison. For raw token generation speed on a single model, a high-bandwidth discrete GPU wins if the model fits in VRAM.
+
+The critical insight in this table: **capacity and bandwidth are independent constraints.** You can have enormous memory and modest bandwidth, or modest memory and enormous bandwidth. The DGX Spark makes this independence visible. It pairs 128GB of unified LPDDR5x — the capacity of a Mac Studio Ultra — with a full Blackwell GPU and 1 PFLOP of FP4 tensor performance, but only 273 GB/s of memory bandwidth — now less than the M5 Pro's 307 GB/s. For decode-dominated conversational workloads, where throughput tracks bandwidth rather than compute, it will feel slower than an M5 Pro for token generation despite having datacenter-class compute. The massive PFLOP helps prefill and finetuning; the bandwidth determines how fast tokens come out in a long conversation.
 
 The practical question is which constraint is actually binding for your workload. If your full working set fits comfortably in VRAM with headroom for KV cache growth, a high-bandwidth discrete GPU is faster. If it doesn't fit — or only fits under quantization that compromises quality — unified memory's larger effective capacity matters more than bandwidth ceiling.
 
@@ -355,7 +360,7 @@ Getting these numbers right required fixing two measurement bugs that are easy t
 
 With both corrections, the measured numbers align with the formulas from the earlier sections: model weight memory within 13% of `params × bytes_per_weight` (the overhead is quantization scales, FP16 embeddings, and layer norms), KV per token matching the GQA-adjusted formula exactly (112 KB), bandwidth utilization in the expected 60–70% range for real workloads, and arithmetic intensity confirming decode is bandwidth-bound. The theory section isn't just framework — it predicts what the profiler measures.
 
-On this M1 with 16GB, decode is already slow enough that a speech pipeline would feel the lag. On higher-bandwidth hardware — M3 Max, M4 Pro, Ultra configurations — the same curve exists but the starting point is higher and the degradation less steep. The tool lets you measure where your specific hardware sits on that curve, with your specific models, rather than relying on spec-sheet bandwidth numbers that don't account for real inference behavior.
+On this M1 with 16GB, decode is already slow enough that a speech pipeline would feel the lag. On higher-bandwidth hardware — M5 Pro, M5 Max, Ultra configurations — the same curve exists but the starting point is higher and the degradation less steep. The tool lets you measure where your specific hardware sits on that curve, with your specific models, rather than relying on spec-sheet bandwidth numbers that don't account for real inference behavior.
 
 The concurrency benchmark (`benchmark_concurrent.py`) goes further: it runs LLM decode and Whisper simultaneously and measures the contention penalty — how much each model slows down when sharing the bus. On the M1, that penalty is substantial. On higher-bandwidth chips, it compresses. Measuring it on your hardware tells you whether your pipeline will jitter under real use.
 
@@ -406,3 +411,4 @@ Hardware selection, in this context, is a systems engineering decision built on 
 - [llama.cpp — LLM inference in C/C++ across platforms](https://github.com/ggerganov/llama.cpp)
 - [Personaplex — Speech-to-Speech Conversational AI](https://personaplex.ai/)
 - [prefill-decode-bench — Measure prefill and decode on your hardware](https://github.com/akashicMarga/prefill-decode-bench)
+- Apple, [M5 Pro and M5 Max announcement (March 2026)](https://www.apple.com/newsroom/2026/03/apple-debuts-m5-pro-and-m5-max-to-supercharge-the-most-demanding-pro-workflows/)
