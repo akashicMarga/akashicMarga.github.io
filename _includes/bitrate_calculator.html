@@ -1,0 +1,115 @@
+<div class="bitrate-calculator" style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:1.5rem;margin:1.5rem 0;font-family:monospace;">
+  <h4 style="color:#58a6ff;margin-top:0;margin-bottom:1rem;">Bitrate Calculator</h4>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+
+    <div>
+      <label style="color:#8b949e;font-size:0.85em;display:block;margin-bottom:4px;">Sample rate (Hz)</label>
+      <select id="bc-sr" onchange="calcBitrate()" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:6px;">
+        <option value="16000">16,000 Hz (telephony)</option>
+        <option value="24000" selected>24,000 Hz (EnCodec / Mimi)</option>
+        <option value="44100">44,100 Hz (DAC / music)</option>
+      </select>
+    </div>
+
+    <div>
+      <label style="color:#8b949e;font-size:0.85em;display:block;margin-bottom:4px;">Stride product</label>
+      <select id="bc-stride" onchange="calcBitrate()" style="width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:6px;">
+        <option value="320">320 → 75 fps (EnCodec)</option>
+        <option value="512">512 → 46.9 fps</option>
+        <option value="640">640 → 37.5 fps</option>
+        <option value="960">960 → 25 fps</option>
+        <option value="1920" selected>1920 → 12.5 fps (Mimi)</option>
+      </select>
+    </div>
+
+    <div>
+      <label style="color:#8b949e;font-size:0.85em;display:block;margin-bottom:4px;">
+        RVQ levels (Q): <span id="bc-q-val" style="color:#58a6ff;">8</span>
+      </label>
+      <input type="range" id="bc-q" min="1" max="16" value="8" oninput="calcBitrate()"
+        style="width:100%;accent-color:#58a6ff;">
+    </div>
+
+    <div>
+      <label style="color:#8b949e;font-size:0.85em;display:block;margin-bottom:4px;">
+        Codebook size (N): <span id="bc-n-val" style="color:#58a6ff;">1024</span>
+      </label>
+      <input type="range" id="bc-n" min="6" max="14" value="10" oninput="calcBitrate()"
+        style="width:100%;accent-color:#58a6ff;">
+      <span style="color:#6e7681;font-size:0.75em;">2^<span id="bc-n-exp">10</span> entries</span>
+    </div>
+
+  </div>
+
+  <div style="background:#0d1117;border-radius:6px;padding:1rem;border:1px solid #21262d;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;text-align:center;">
+      <div>
+        <div style="color:#8b949e;font-size:0.75em;">Frames / sec</div>
+        <div id="bc-fps" style="color:#58a6ff;font-size:1.4em;font-weight:bold;">12.5</div>
+      </div>
+      <div>
+        <div style="color:#8b949e;font-size:0.75em;">Bits / frame</div>
+        <div id="bc-bpf" style="color:#3fb950;font-size:1.4em;font-weight:bold;">80</div>
+      </div>
+      <div>
+        <div style="color:#8b949e;font-size:0.75em;">Total bitrate</div>
+        <div id="bc-total" style="color:#e6edf3;font-size:1.4em;font-weight:bold;">1.0 kbps</div>
+      </div>
+    </div>
+
+    <div style="margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid #21262d;">
+      <div id="bc-formula" style="color:#6e7681;font-size:0.8em;text-align:center;font-family:monospace;"></div>
+    </div>
+
+    <div style="margin-top:0.6rem;">
+      <div id="bc-bar-container" style="background:#21262d;border-radius:4px;height:10px;overflow:hidden;">
+        <div id="bc-bar" style="height:100%;background:#58a6ff;transition:width 0.3s;width:10%;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:#6e7681;font-size:0.7em;margin-top:2px;">
+        <span>0.5 kbps</span><span>3 kbps (phone)</span><span>128 kbps (MP3)</span>
+      </div>
+    </div>
+
+    <div id="bc-comparison" style="margin-top:0.8rem;color:#8b949e;font-size:0.82em;text-align:center;"></div>
+  </div>
+</div>
+
+<script>
+function calcBitrate() {
+  const sr     = parseInt(document.getElementById('bc-sr').value);
+  const stride = parseInt(document.getElementById('bc-stride').value);
+  const Q      = parseInt(document.getElementById('bc-q').value);
+  const nExp   = parseInt(document.getElementById('bc-n').value);
+  const N      = Math.pow(2, nExp);
+
+  const fps    = sr / stride;
+  const bpf    = Q * nExp;       // bits per frame = Q levels × log2(N) bits each
+  const bps    = fps * bpf;      // bits per second
+  const kbps   = bps / 1000;
+
+  document.getElementById('bc-q-val').textContent  = Q;
+  document.getElementById('bc-n-val').textContent  = N.toLocaleString();
+  document.getElementById('bc-n-exp').textContent  = nExp;
+  document.getElementById('bc-fps').textContent    = fps % 1 === 0 ? fps : fps.toFixed(1);
+  document.getElementById('bc-bpf').textContent    = bpf;
+  document.getElementById('bc-total').textContent  = kbps >= 1 ? kbps.toFixed(1) + ' kbps' : (bps).toFixed(0) + ' bps';
+  document.getElementById('bc-formula').textContent =
+    `${fps.toFixed(1)} fps  ×  ${Q} levels  ×  log₂(${N.toLocaleString()}) bits  =  ${bps.toFixed(0)} bps`;
+
+  // Progress bar (0.5kbps to 128kbps log scale)
+  const pct = Math.min(100, Math.max(1, (Math.log(kbps) - Math.log(0.5)) / (Math.log(128) - Math.log(0.5)) * 100));
+  document.getElementById('bc-bar').style.width = pct + '%';
+
+  // Comparison label
+  let cmp = '';
+  if      (kbps < 1)   cmp = 'Ultra-compressed — Mimi territory (1 kbps)';
+  else if (kbps < 4)   cmp = 'Excellent — better than telephony (8 kbps)';
+  else if (kbps < 10)  cmp = 'Good — comparable to SILK/Opus voice codec';
+  else if (kbps < 32)  cmp = 'Moderate — similar to streaming voice';
+  else if (kbps < 96)  cmp = 'High — approaching MP3 quality range';
+  else                  cmp = 'Very high — near lossless territory';
+  document.getElementById('bc-comparison').textContent = cmp;
+}
+calcBitrate();
+</script>
