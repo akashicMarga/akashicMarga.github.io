@@ -13,3 +13,4 @@ assets/animations/media/
 .env.development
 .env.test
 .env.production
+assets/animations/__pycache__/
